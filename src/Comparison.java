@@ -20,6 +20,10 @@ public class Comparison {
     private int caseCount = 0;
     private int forCount = 0;
 
+    private ArrayList<String> comments = new ArrayList<>();
+
+    private int validCount = 0;
+
     private double ifCountDiv = 0;
     private double curlyBracketCountDiv = 0;
     private double regularBracketCountDiv = 0;
@@ -32,7 +36,7 @@ public class Comparison {
     private double forCountDiv = 0;
 
     public Comparison(int lineCount, int ifCount, int curlyBracketCount, int regularBracketCount, int forCount, int
-                      caseCount, int whileCount, int doWhileCount, int elseIfCount, int numRegions) {
+                      caseCount, int whileCount, int doWhileCount, int elseIfCount, int numRegions, ArrayList<String> comments) {
         this.lineCount = lineCount;
         this.ifCount = ifCount;
         this.curlyBracketCount = curlyBracketCount*2;
@@ -43,196 +47,192 @@ public class Comparison {
         this.doWhileCount = doWhileCount;
         this.elseIfCount = elseIfCount;
         this.numRegions = numRegions;
+        this.comments = comments;
     }
 
     public double getPercentDiff(int valueA, int valueB) {
-        return (Math.abs(valueA - valueB) / (double) valueA)*100;
+        if (valueA > 0) {
+            return (Math.abs(valueA - valueB) / (double) valueA) * 100;
+        }
+        else if (valueB > 0) {
+            return (Math.abs(valueA-valueB) / (double) valueB) * 100;
+        }
+        return 43110;
     }
 
     public int getIfCount() {
         return ifCount;
     }
 
-    public void setIfCount(int ifCount) {
-        this.ifCount = ifCount;
-    }
-
     public int getCurlyBracketCount() {
         return curlyBracketCount;
-    }
-
-    public void setCurlyBracketCount(int curlyBracketCount) {
-        this.curlyBracketCount = curlyBracketCount;
     }
 
     public int getRegularBracketCount() {
         return regularBracketCount;
     }
 
-    public void setRegularBracketCount(int regularBracketCount) {
-        this.regularBracketCount = regularBracketCount;
-    }
-
     public int getLineCount() {
         return lineCount;
-    }
-
-    public void setLineCount(int lineCount) {
-        this.lineCount = lineCount;
     }
 
     public double getIfCountDiv() {
         return ifCountDiv;
     }
 
-    public void setIfCountDiv(int ifCountDiv) {
-        this.ifCountDiv = ifCountDiv;
-    }
-
     public double getCurlyBracketCountDiv() {
         return curlyBracketCountDiv;
-    }
-
-    public void setCurlyBracketCountDiv(int curlyBracketCountDiv) {
-        this.curlyBracketCountDiv = curlyBracketCountDiv;
     }
 
     public double getLineCountDiv() {
         return lineCountDiv;
     }
 
-    public void setLineCountDiv(int lineCountDiv) {
-        this.lineCountDiv = lineCountDiv;
-    }
-
     public double getRegularBracketCountDiv() {
         return regularBracketCountDiv;
     }
 
-    public void setRegularBracketCountDiv(int regularBracketCountDiv) {
-        this.regularBracketCountDiv = regularBracketCountDiv;
-    }
-
     public String toString() {
-        return ("Num Lines: " + lineCount + " | if Count: " + ifCount + " | curlyBracketCount: " + curlyBracketCount
-        + " | regBracketCount: " + regularBracketCount);
+        return ("Num Lines: " + this.lineCount + " | if Count: " + this.ifCount + " | curlyBracketCount: " + this.curlyBracketCount
+        + " | regBracketCount: " + this.regularBracketCount + " | Comments " + this.comments);
     }
 
-    public void deviation(Comparison x) {
-        lineCountDiv = getPercentDiff(this.lineCount, x.getLineCount());
-        System.out.printf("The line count differs by %.2f%%%n", lineCountDiv);
+    public double deviation(Comparison x) {
+        double totalWeight = 0.0;
+        double weightedSum = 0.0;
 
-        ifCountDiv = getPercentDiff(this.ifCount, x.getIfCount());
-        System.out.printf("The if count differs by %.2f%%$n", ifCountDiv);
+        // Assign weights to each metric
+        double lineCountWeight = 1.2;
+        double ifCountWeight = 1.5;
+        double elseIfCountWeight = 1.3;
+        double curlyBracketCountWeight = 0.7;
+        double regularBracketCountWeight = 0.6;
+        double numRegionsWeight = 1.0;
+        double forCountWeight = 1.4;
+        double whileCountWeight = 1.4;
+        double doWhileCountWeight = 1.1;
+        double caseCountWeight = 1.2;
+
+        // Calculate and add each weighted contribution if applicable
+        lineCountDiv = getPercentDiff(this.lineCount, x.getLineCount());
+        weightedSum += lineCountDiv * lineCountWeight;
+        totalWeight += lineCountWeight;
+
+        if (this.ifCount > 0 || x.getIfCount() > 0) {
+            validCount++;
+            ifCountDiv = getPercentDiff(this.ifCount, x.getIfCount());
+            weightedSum += ifCountDiv * ifCountWeight;
+            totalWeight += ifCountWeight;
+        }
+
+        if (this.elseIfCount > 0 || x.getElseIfCount() > 0) {
+            validCount++;
+            elseIfCountDiv = getPercentDiff(this.elseIfCount, x.getElseIfCount());
+            weightedSum += elseIfCountDiv * elseIfCountWeight;
+            totalWeight += elseIfCountWeight;
+        }
 
         curlyBracketCountDiv = getPercentDiff(this.curlyBracketCount, x.getCurlyBracketCount());
-        System.out.printf("The number of curly brackets differ by %.2f%%%n", curlyBracketCountDiv);
+        weightedSum += curlyBracketCountDiv * curlyBracketCountWeight;
+        totalWeight += curlyBracketCountWeight;
 
         regularBracketCountDiv = getPercentDiff(this.regularBracketCount, x.getRegularBracketCount());
-        System.out.printf("The number of regular brackets differ by %.2f%%%n", regularBracketCountDiv);
+        weightedSum += regularBracketCountDiv * regularBracketCountWeight;
+        totalWeight += regularBracketCountWeight;
 
         numRegionsDiv = getPercentDiff(this.numRegions + 1, x.getNumRegions() + 1);
-        System.out.printf("The Cyclomatic Complexity differs by %.2f%%%n", numRegionsDiv);
+        weightedSum += numRegionsDiv * numRegionsWeight;
+        totalWeight += numRegionsWeight;
 
-        double average = (lineCountDiv + ifCountDiv + curlyBracketCountDiv + regularBracketCountDiv) / 4;
+        if (this.forCount > 0 || x.getForCount() > 0) {
+            validCount++;
+            forCountDiv = getPercentDiff(this.forCount, x.getForCount());
+            weightedSum += forCountDiv * forCountWeight;
+            totalWeight += forCountWeight;
+        }
 
-        System.out.printf("The average deviation is: %.2f%%%n", average);
+        if (this.whileCount > 0 || x.getWhileCount() > 0) {
+            validCount++;
+            whileCountDiv = getPercentDiff(this.whileCount, x.getWhileCount());
+            weightedSum += whileCountDiv * whileCountWeight;
+            totalWeight += whileCountWeight;
+        }
 
+        if (this.doWhileCount > 0 || x.getDoWhileCount() > 0) {
+            validCount++;
+            doWhileCountDiv = getPercentDiff(this.doWhileCount, x.getDoWhileCount());
+            weightedSum += doWhileCountDiv * doWhileCountWeight;
+            totalWeight += doWhileCountWeight;
+        }
+
+        if (this.caseCount > 0 || x.getCaseCount() > 0) {
+            validCount++;
+            caseCountDiv = getPercentDiff(this.caseCount, x.getCaseCount());
+            weightedSum += caseCountDiv * caseCountWeight;
+            totalWeight += caseCountWeight;
+        }
+
+        double weightedAverage = weightedSum / totalWeight;
+
+        double confidenceScore = 100 - weightedAverage;
+
+        if (confidenceScore < 0) {
+            confidenceScore = 0;
+        }
+
+        System.out.printf("The weighted average deviation is: %.2f%%%n", weightedAverage);
+        System.out.printf("Confidence score of cheating likelihood: %.2f%%%n", confidenceScore);
+
+        return weightedAverage;
     }
 
     public double getNumRegionsDiv() {
         return numRegionsDiv;
     }
 
-    public void setNumRegionsDiv(double numRegionsDiv) {
-        this.numRegionsDiv = numRegionsDiv;
-    }
-
     public double getElseIfCountDiv() {
         return elseIfCountDiv;
     }
 
-    public void setElseIfCountDiv(double elseIfCountDiv) {
-        this.elseIfCountDiv = elseIfCountDiv;
-    }
 
     public double getWhileCountDiv() {
         return whileCountDiv;
     }
 
-    public void setWhileCountDiv(double whileCountDiv) {
-        this.whileCountDiv = whileCountDiv;
-    }
 
     public double getDoWhileCountDiv() {
         return doWhileCountDiv;
     }
 
-    public void setDoWhileCountDiv(double doWhileCountDiv) {
-        this.doWhileCountDiv = doWhileCountDiv;
-    }
-
-    public double getCaseCountDiv() {
-        return caseCountDiv;
-    }
-
-    public void setCaseCountDiv(double caseCountDiv) {
-        this.caseCountDiv = caseCountDiv;
-    }
+    public double getCaseCountDiv() {return caseCountDiv;}
 
     public double getForCountDiv() {
         return forCountDiv;
-    }
-
-    public void setForCountDiv(double forCountDiv) {
-        this.forCountDiv = forCountDiv;
     }
 
     public int getForCount() {
         return forCount;
     }
 
-    public void setForCount(int forCount) {
-        this.forCount = forCount;
-    }
-
     public int getCaseCount() {
         return caseCount;
-    }
-
-    public void setCaseCount(int caseCount) {
-        this.caseCount = caseCount;
     }
 
     public int getWhileCount() {
         return whileCount;
     }
 
-    public void setWhileCount(int whileCount) {
-        this.whileCount = whileCount;
-    }
-
     public int getNumRegions() {
         return numRegions;
-    }
-
-    public void setNumRegions(int numRegions) {
-        this.numRegions = numRegions;
     }
 
     public int getElseIfCount() {
         return elseIfCount;
     }
 
-    public void setElseIfCount(int elseIfCount) {
-        this.elseIfCount = elseIfCount;
-    }
-
     public int getDoWhileCount() {
         return doWhileCount;
     }
 
-    public void setDoWhileCount(int doWhileCount) {
-        this.doWhileCount = doWhileCount;
-    }
+
 }

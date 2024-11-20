@@ -2,6 +2,7 @@
 TODO : Add info here
  */
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -20,11 +21,9 @@ public class Main {
     public static int forCount = 0;
 
     // Colours from https://www.mymiller.name/wordpress/java/ansi-colors/
-    public static final String RESET = "\u001B[0m";
     public static final String BRIGHT_RED = "\u001B[31;1m";
-    public static final String BRIGHT_BLUE = "\u001B[34;1m";
-    public static final String BRIGHT_MAGENTA = "\u001B[35;1m";
-    public static final String BRIGHT_WHITE = "\u001B[37;1m";
+
+    public static ArrayList<String> comments = new ArrayList<>();
 
     public static void processData(String filePath) {
         try {
@@ -47,9 +46,30 @@ public class Main {
                 System.exit(43110);
             }
 
+            boolean skib = false;
+
             while (scnr.hasNextLine()) {
                 String line = scnr.nextLine();
                 String[] values = line.split(" ");
+
+                if (skib) {
+                    comments.add(line);
+                    if (line.contains("*/")) {
+                        skib = false;
+                    }
+                }
+
+                else if (line.contains("//")) {
+                    comments.add(line.substring(line.indexOf("//")));
+                }
+
+                else if (line.contains("/*")) {
+                    skib = true;
+                    comments.add(line.substring(line.indexOf("/*")));
+                    if (line.contains("*/")) {
+                        skib = false;
+                    }
+                }
 
                 if (line.contains("if")) {
                     ifCount++;
@@ -109,6 +129,7 @@ public class Main {
         doWhileCount = 0;
         elseIfCount = 0;
         numRegions = 0;
+        comments.clear();
     }
 
     // Print statement because no one likes Java
@@ -116,26 +137,78 @@ public class Main {
         System.out.println(msg);
     }
 
+    public static void CSVMaker(String fileName, Comparison fileA, Comparison fileB, double finalPercent) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.append("Metric,FileA,FileB,Deviation (%)\n");
+            writer.append("Line Count,").append(String.valueOf(fileA.getLineCount())).append(",")
+                    .append(String.valueOf(fileB.getLineCount())).append(",")
+                    .append(String.format("%.2f", fileA.getLineCountDiv())).append("\n");
+            writer.append("if Count,").append(String.valueOf(fileA.getIfCount())).append(",")
+                    .append(String.valueOf(fileB.getIfCount())).append(",")
+                    .append(String.format("%.2f", fileA.getIfCountDiv())).append("\n");
+            writer.append("Curly Bracket Count,").append(String.valueOf(fileA.getCurlyBracketCount())).append(",")
+                    .append(String.valueOf(fileB.getCurlyBracketCount())).append(",")
+                    .append(String.format("%.2f", fileA.getCurlyBracketCountDiv())).append("\n");
+            writer.append("Regular Bracket Count,").append(String.valueOf(fileA.getRegularBracketCount())).append(",")
+                    .append(String.valueOf(fileB.getRegularBracketCount())).append(",")
+                    .append(String.format("%.2f", fileA.getRegularBracketCountDiv())).append("\n");
+            writer.append("Cyclomatic Complexity,").append(String.valueOf(fileA.getNumRegions())).append(",")
+                    .append(String.valueOf(fileB.getNumRegions())).append(",")
+                    .append(String.format("%.2f", fileA.getNumRegionsDiv())).append("\n");
+            writer.append("Overall Similarity (%), , ,").append(String.format("%.2f", finalPercent)).append("\n");
+
+            System.out.println("Results saved to " + fileName);
+        } catch (IOException e) {
+            System.out.println("Error writing to CSV file: " + e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples1.java");
         Comparison fileA = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions);
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
         valueReset();
         print(String.valueOf(fileA));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples2.java");
         Comparison fileB = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions);
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
         valueReset();
         print(String.valueOf(fileB));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples3.java");
         Comparison fileC = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions);
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
         valueReset();
         print(String.valueOf(fileC));
+        print("-----------------------------------------------");
+        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\Spotit.java");
+        Comparison fileD = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+        valueReset();
+        print(String.valueOf(fileD));
+        print("-----------------------------------------------");
+        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\pspotit.java");
+        Comparison fileE = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+        valueReset();
+        print(String.valueOf(fileE));
+        print("-----------------------------------------------");
+        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\uspotit.java");
+        Comparison fileF = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+        valueReset();
+        print(String.valueOf(fileF));
+        print("-----------------------------------------------");
+        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\sspotit.java");
+        Comparison fileG = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
+                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+        valueReset();
+        print(String.valueOf(fileG));
 
-        fileA.deviation(fileC);
+        double finalPercent = fileD.deviation(fileG);
+
+        CSVMaker("comparison_results.csv", fileD, fileG, finalPercent);
 
     }
 }
