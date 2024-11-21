@@ -35,6 +35,8 @@ public class Comparison {
     private double caseCountDiv = 0;
     private double forCountDiv = 0;
 
+    private double commentSimilartiy = 0;
+
     public Comparison(int lineCount, int ifCount, int curlyBracketCount, int regularBracketCount, int forCount, int
                       caseCount, int whileCount, int doWhileCount, int elseIfCount, int numRegions, ArrayList<String> comments) {
         this.lineCount = lineCount;
@@ -184,6 +186,20 @@ public class Comparison {
         System.out.printf("Confidence score of cheating likelihood: %.2f%%%n", confidenceScore);
 
         return weightedAverage;
+    }
+
+    public void test(Comparison x) {
+            if (this.comments.isEmpty() && x.comments.isEmpty()) {
+                print("100.0%");
+            }
+
+            Set<String> intersection = new HashSet<>(this.comments);
+            intersection.retainAll(x.comments);
+
+            Set<String> union = new HashSet<>(this.comments);
+            union.addAll(x.comments);
+
+            print((double) intersection.size() / union.size() * 100 + "%");
     }
 
     public double getNumRegionsDiv() {

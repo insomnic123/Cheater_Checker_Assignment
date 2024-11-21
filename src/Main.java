@@ -166,49 +166,52 @@ public class Main {
     public static void main(String[] args) {
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples1.java");
         Comparison fileA = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileA));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples2.java");
         Comparison fileB = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileB));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples3.java");
         Comparison fileC = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileC));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\Spotit.java");
         Comparison fileD = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileD));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\pspotit.java");
         Comparison fileE = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileE));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\uspotit.java");
         Comparison fileF = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileF));
         print("-----------------------------------------------");
         processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\sspotit.java");
         Comparison fileG = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, comments);
+                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
         valueReset();
         print(String.valueOf(fileG));
 
-        double finalPercent = fileD.deviation(fileG);
+        double finalPercent = fileA.deviation(fileC);
 
-        CSVMaker("comparison_results.csv", fileD, fileG, finalPercent);
+        fileA.test(fileB);
+
+
+        CSVMaker("comparison_results.csv", fileA, fileB, finalPercent);
 
     }
 }
