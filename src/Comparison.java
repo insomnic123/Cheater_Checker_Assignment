@@ -1,5 +1,3 @@
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 public class Comparison {
@@ -37,20 +35,21 @@ public class Comparison {
 
     private double commentSimilartiy = 0;
 
-    public Comparison(int lineCount, int ifCount, int curlyBracketCount, int regularBracketCount, int forCount, int
-                      caseCount, int whileCount, int doWhileCount, int elseIfCount, int numRegions, ArrayList<String> comments) {
+    public Comparison(int lineCount, int ifCount, int curlyBracketCount, int regularBracketCount, int forCount,
+                      int caseCount, int whileCount, int doWhileCount, int elseIfCount, int numRegions, Set<String> comments) {
         this.lineCount = lineCount;
         this.ifCount = ifCount;
-        this.curlyBracketCount = curlyBracketCount*2;
-        this.regularBracketCount = regularBracketCount*2;
+        this.curlyBracketCount = curlyBracketCount * 2;
+        this.regularBracketCount = regularBracketCount * 2;
         this.forCount = forCount;
         this.caseCount = caseCount;
         this.whileCount = whileCount;
         this.doWhileCount = doWhileCount;
         this.elseIfCount = elseIfCount;
         this.numRegions = numRegions;
-        this.comments = comments;
+        this.comments = new ArrayList<>(comments); // Convert Set back to List for compatibility
     }
+
 
     public double getPercentDiff(int valueA, int valueB) {
         if (valueA > 0) {
@@ -104,16 +103,32 @@ public class Comparison {
         double weightedSum = 0.0;
 
         // Assign weights to each metric
-        double lineCountWeight = 1.2;
+        double lineCountWeight = 1.5;
         double ifCountWeight = 1.5;
-        double elseIfCountWeight = 1.3;
-        double curlyBracketCountWeight = 0.7;
-        double regularBracketCountWeight = 0.6;
+        double elseIfCountWeight = 1.0;
+        double curlyBracketCountWeight = 0.5;
+        double regularBracketCountWeight = 0.5;
         double numRegionsWeight = 1.0;
         double forCountWeight = 1.4;
         double whileCountWeight = 1.4;
         double doWhileCountWeight = 1.1;
         double caseCountWeight = 1.2;
+        double commentSimilarityWeight = 0.5;
+
+        Set<String> intersection = new HashSet<>(this.comments);
+        intersection.retainAll(x.comments);
+
+        if (this.comments.isEmpty() && x.comments.isEmpty()) {
+            commentSimilartiy = 100;
+        }
+
+        Set<String> union = new HashSet<>(this.comments);
+        union.addAll(x.comments);
+
+        commentSimilartiy = (double) intersection.size() / union.size() * 100;
+        weightedSum += commentSimilartiy * commentSimilarityWeight;
+        totalWeight += commentSimilarityWeight;
+        validCount++;
 
         // Calculate and add each weighted contribution if applicable
         lineCountDiv = getPercentDiff(this.lineCount, x.getLineCount());
@@ -188,18 +203,17 @@ public class Comparison {
         return weightedAverage;
     }
 
-    public void test(Comparison x) {
-            if (this.comments.isEmpty() && x.comments.isEmpty()) {
-                print("100.0%");
-            }
+    public static Set<String> processComments(String[] comments) {
+        Set<String> wordSet = new HashSet<>();
+        for (String comment : comments) {
+            String[] words = comment.toLowerCase().split("\\W+");
+            wordSet.addAll(Arrays.asList(words));
+        }
+        return wordSet;
+    }
 
-            Set<String> intersection = new HashSet<>(this.comments);
-            intersection.retainAll(x.comments);
+    public void commentSimilarity(Comparison x) {
 
-            Set<String> union = new HashSet<>(this.comments);
-            union.addAll(x.comments);
-
-            print((double) intersection.size() / union.size() * 100 + "%");
     }
 
     public double getNumRegionsDiv() {

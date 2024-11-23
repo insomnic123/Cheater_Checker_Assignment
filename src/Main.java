@@ -2,7 +2,6 @@
 TODO : Add info here
  */
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -19,6 +18,8 @@ public class Main {
     public static int doWhileCount = 0;
     public static int caseCount = 0;
     public static int forCount = 0;
+
+    public static String directoryShortCut = "C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\";
 
     // Colours from https://www.mymiller.name/wordpress/java/ansi-colors/
     public static final String BRIGHT_RED = "\u001B[31;1m";
@@ -57,13 +58,9 @@ public class Main {
                     if (line.contains("*/")) {
                         skib = false;
                     }
-                }
-
-                else if (line.contains("//")) {
+                } else if (line.contains("//")) {
                     comments.add(line.substring(line.indexOf("//")));
-                }
-
-                else if (line.contains("/*")) {
+                } else if (line.contains("/*")) {
                     skib = true;
                     comments.add(line.substring(line.indexOf("/*")));
                     if (line.contains("*/")) {
@@ -110,6 +107,8 @@ public class Main {
                 }
 
                 lineCount++;
+
+                comments = new ArrayList<>(Comparison.processComments(comments.toArray(new String[0])));
             }
         } catch (FileNotFoundException e) {
             print(BRIGHT_RED + "File not found: " + e.getMessage()); // Catches errors
@@ -164,51 +163,49 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples1.java");
+        processData(directoryShortCut + "SumOfMultiples1.java");
         Comparison fileA = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileA));
         print("-----------------------------------------------");
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples2.java");
+        processData(directoryShortCut + "SumOfMultiples2.java");
         Comparison fileB = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileB));
         print("-----------------------------------------------");
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\SumOfMultiples3.java");
+        processData(directoryShortCut + "SumOfMultiples3.java");
         Comparison fileC = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileC));
         print("-----------------------------------------------");
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\Spotit.java");
+        processData(directoryShortCut + "Spotit.java");
         Comparison fileD = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileD));
         print("-----------------------------------------------");
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\pspotit.java");
+        processData(directoryShortCut + "pspotit.java");
         Comparison fileE = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileE));
         print("-----------------------------------------------");
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\uspotit.java");
+        processData(directoryShortCut + "uspotit.java");
         Comparison fileF = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileF));
         print("-----------------------------------------------");
-        processData("C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\sspotit.java");
+        processData(directoryShortCut + "sspotit.java");
         Comparison fileG = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, (ArrayList<String>)comments.clone());
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         valueReset();
         print(String.valueOf(fileG));
 
-        double finalPercent = fileA.deviation(fileC);
-
-        fileA.test(fileB);
+        double finalPercent = fileB.deviation(fileA);
 
 
         CSVMaker("comparison_results.csv", fileA, fileB, finalPercent);
