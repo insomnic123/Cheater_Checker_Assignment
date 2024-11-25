@@ -1,5 +1,10 @@
 /*
-TODO : Add info here
+Author: Qazi Ahmed Ayan
+Teacher: M. Lal
+Course: CS12
+Program Name: Cheater Checker
+Program Description: An incredibly simple programming cheater checker which takes several file types into consideration and
+generates a confidence score for how likely it is that two programs have been copied off of one another.
  */
 import java.io.*;
 import java.util.*;
@@ -8,11 +13,12 @@ public class Main {
 
     public static Scanner scanner = new Scanner(System.in);
 
+    // Declaring all the factors considered
     public static int ifCount = 0;
     public static int curlyBracketCount = 0;
     public static int regularBracketCount = 0;
     public static int lineCount = 0;
-    public static int numRegions = 0; // https://www.youtube.com/watch?v=edjOiohPPw8&ab_channel=TahiaTabassum
+    public static int numRegions = 0; // Used to calculate Cyclomatic Complexity, as per: https://www.youtube.com/watch?v=edjOiohPPw8&ab_channel=TahiaTabassum
     public static int elseIfCount = 0;
     public static int whileCount = 0;
     public static int doWhileCount = 0;
@@ -21,7 +27,7 @@ public class Main {
 
     public static Output output = new Output();
 
-
+    // Declarations to ensure the user has to input minimal information
     public static String directoryShortCut = "";
     public static String extension = "";
 
@@ -31,6 +37,7 @@ public class Main {
 
     public static ArrayList<String> comments = new ArrayList<>();
 
+    // Method for processing the data
     public static Comparison processData(String filePath) {
         try {
             File myFile = new File(filePath);
@@ -45,15 +52,17 @@ public class Main {
                 print(BRIGHT_RED + "Error: File is empty");
                 return null;
             }
-
-            // Reset values
+            // Reset values again, in case
             valueReset();
             boolean skib = false;
 
+            // Counts the instances of certain attributes
             while (scnr.hasNextLine()) {
                 String line = scnr.nextLine();
                 String[] values = line.split(" ");
 
+
+                // Checks if we're in a block comment
                 if (skib) {
                     comments.add(line);
                     if (line.contains("*/")) {
@@ -104,13 +113,14 @@ public class Main {
             }
 
             return new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                    whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
+                    whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments)); // Returns Comparison Type and instantiates a Comparison object with all the data of the file; info per https://www.w3schools.com/java/java_hashset.asp
         } catch (FileNotFoundException e) {
             print(BRIGHT_RED + "File not found: " + e.getMessage() + RESET);
             return null;
         }
     }
 
+    // Resets all values
     public static void valueReset() {
         lineCount = 0;
         ifCount = 0;
@@ -130,19 +140,12 @@ public class Main {
         System.out.println(msg);
     }
 
-    public static void createFiles(String directoryName) {
-        processData(directoryShortCut + directoryName);
-        Comparison file1 = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-    }
-
+    // Start menu
     public static int startMenu() {
         print("Please select an option from one of the following:");
         print("--------------------------------------------------");
         print("[1]  |        Add a file for Comparison          |");
         print("[2]  |           Compare two files               |");
-        print("[3]  |             Clear Outputs                 |");
         print("[4]  |                 Quit                      |");
 
         int input;
@@ -152,7 +155,7 @@ public class Main {
             try {
                 input = scanner.nextInt();
                 scanner.nextLine();
-                while (input < 1 || input > 4) {
+                while (input < 1 || input > 3) {
                     print("That's an invalid input! Please put an integer between 1 and 3");
                     input = scanner.nextInt();
                 }
@@ -167,7 +170,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Map<String, Comparison> files = new HashMap<>();
+        Map<String, Comparison> files = new HashMap<>(); // Hashmap knowledge from: https://www.w3schools.com/java/java_hashmap.asp
         boolean skib = true;
 
         print("Please input the type of files you wish to compare today! (ex. txt, java, py - it's case sensitive!");
@@ -176,9 +179,9 @@ public class Main {
         print("Please enter the directory of the file in which you have added all the files you wish to compare: ");
         directoryShortCut = scanner.nextLine() + "\\";
 
-        print("Please enter the name of the *txt* file you wish to output the results to:");
+        print("Please enter the name of the file you wish to output the results to:");
         String outputFile = directoryShortCut + scanner.nextLine() + ".txt";
-        output.setFileName(outputFile);
+        output.createFile(outputFile);
         print(outputFile);
 
         while (skib) {
@@ -206,39 +209,37 @@ public class Main {
                         break;
                     }
 
+                    // Gets information for comparisons
                     print("Available files: " + files.keySet());
                     print("Enter the name of the first file:");
                     String file1 = scanner.nextLine().toLowerCase();
                     print("Enter the name of the second file:");
                     String file2 = scanner.nextLine().toLowerCase();
 
+                    // Compares two given files and returns the adequate information, as well as saves it to a TXT file
                     if (files.containsKey(file1) && files.containsKey(file2)) {
-
                         print("Please enter the confidence/threshold to determine cheating (50% - 70% recommended for larger files, " +
                                 "80% - 90% recommended for smaller files)");
-                        int guess = scanner.nextInt();
-                        double similarity = files.get(file1).deviation(files.get(file2), output, file1, file2);
 
-                        if (similarity >= guess) {
+                        int guess = scanner.nextInt();
+
+                        double confidence = files.get(file1).deviation(files.get(file2), output, file1, file2);
+
+                        // Outputs if cheating is likely or not
+                        if (confidence >= guess) {
                             output.logAndPrint(String.format("Based on the threshold, it's likely that the individuals cheated.%n"));
                         }
                         else {
                             output.logAndPrint(String.format("Based on the threshold, it's unlikely that the individuals cheated.%n"));
                         }
 
-                        output.writeToFile();
-
-
+                        output.writeToFile(); // Writes output to file
                     } else {
                         print("One or both files not found.");
                     }
                     break;
 
                 case 3:
-                    output.clearLog();
-                    print("Output has been cleared!");
-
-                case 4:
                     print("k.");
                     skib = false;
                     break;
@@ -246,6 +247,7 @@ public class Main {
                 default:
                     print("Invalid choice. Please try again.");
                     break;
+
             }
         }
     }

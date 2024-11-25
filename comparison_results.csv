@@ -1,7 +1,0 @@
-Metric,FileA,FileB,Deviation (%)
-Line Count,640,570,0.00
-if Count,54,31,0.00
-Curly Bracket Count,234,92,0.00
-Regular Bracket Count,510,286,0.00
-Cyclomatic Complexity,120,131,0.00
-Overall Similarity (%), , ,62.96
