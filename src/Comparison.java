@@ -52,11 +52,8 @@ public class Comparison {
 
 
     public double getPercentDiff(int valueA, int valueB) {
-        if (valueA > 0) {
-            return (Math.abs(valueA - valueB) / (double) valueA) * 100;
-        }
-        else if (valueB > 0) {
-            return (Math.abs(valueA-valueB) / (double) valueB) * 100;
+        if (valueA + valueB > 0) {
+            return (Math.abs(valueA - valueB) / ((valueA + valueB) / 2.0)) * 100;
         }
         return 43110;
     }
@@ -98,22 +95,22 @@ public class Comparison {
         + " | regBracketCount: " + this.regularBracketCount + " | Comments " + this.comments);
     }
 
-    public double deviation(Comparison x) {
+    public double deviation(Comparison x, Output output, String file1name, String file2name) {
         double totalWeight = 0.0;
         double weightedSum = 0.0;
 
         // Assign weights to each metric
-        double lineCountWeight = 1.5;
+        double lineCountWeight = 1.0;
         double ifCountWeight = 1.5;
-        double elseIfCountWeight = 1.0;
+        double elseIfCountWeight = 1.5;
         double curlyBracketCountWeight = 0.5;
         double regularBracketCountWeight = 0.5;
-        double numRegionsWeight = 1.0;
+        double numRegionsWeight = 1.5;
         double forCountWeight = 1.4;
         double whileCountWeight = 1.4;
-        double doWhileCountWeight = 1.1;
+        double doWhileCountWeight = 1.2;
         double caseCountWeight = 1.2;
-        double commentSimilarityWeight = 0.5;
+        double commentSimilarityWeight = 0.8;
 
         Set<String> intersection = new HashSet<>(this.comments);
         intersection.retainAll(x.comments);
@@ -197,10 +194,13 @@ public class Comparison {
             confidenceScore = 0;
         }
 
-        System.out.printf("The weighted average deviation is: %.2f%%%n", weightedAverage);
-        System.out.printf("Confidence score of cheating likelihood: %.2f%%%n", confidenceScore);
+        output.logAndPrint(String.format("Files: %s and %s", file1name, file2name));
+        output.logAndPrint(String.format("The weighted average deviation is: %.2f%%", weightedAverage));
+        output.logAndPrint(String.format("Confidence score of cheating likelihood: %.2f%%", confidenceScore));
 
-        return weightedAverage;
+        output.writeToFile();
+
+        return confidenceScore;
     }
 
     public static Set<String> processComments(String[] comments) {
@@ -210,10 +210,6 @@ public class Comparison {
             wordSet.addAll(Arrays.asList(words));
         }
         return wordSet;
-    }
-
-    public void commentSimilarity(Comparison x) {
-
     }
 
     public double getNumRegionsDiv() {

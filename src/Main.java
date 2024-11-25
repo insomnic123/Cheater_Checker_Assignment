@@ -19,34 +19,35 @@ public class Main {
     public static int caseCount = 0;
     public static int forCount = 0;
 
-    public static String directoryShortCut = "C:\\Users\\qazia\\Desktop\\CS12\\Cheater Checker Assignmnt\\src\\";
+    public static Output output = new Output();
+
+
+    public static String directoryShortCut = "";
+    public static String extension = "";
 
     // Colours from https://www.mymiller.name/wordpress/java/ansi-colors/
     public static final String BRIGHT_RED = "\u001B[31;1m";
+    public static final String RESET = "\u001B[0m";
 
     public static ArrayList<String> comments = new ArrayList<>();
 
-    public static void processData(String filePath) {
+    public static Comparison processData(String filePath) {
         try {
             File myFile = new File(filePath);
             Scanner scnr = new Scanner(myFile);
 
-            // Checks if file exists and ends the program if it doesn't
-            if (myFile.exists()) {
-                print("File name: " + myFile.getName());
-                print("File size in bytes: " + myFile.length());
-                // if the first line is a header print it out:
-                print("Header: " + scnr.nextLine());
-                print("---------------------------------------");
-            } else {
+            // Checks if file exists
+            if (!myFile.exists()) {
                 print(BRIGHT_RED + "The file does not exist.");
-                System.exit(43110); //  Get it cuz 43110 looks like hello :D
+                return null;
             }
             if (!scnr.hasNext()) {
                 print(BRIGHT_RED + "Error: File is empty");
-                System.exit(43110);
+                return null;
             }
 
+            // Reset values
+            valueReset();
             boolean skib = false;
 
             while (scnr.hasNextLine()) {
@@ -72,48 +73,41 @@ public class Main {
                     ifCount++;
                     numRegions++;
                 }
-
                 if (line.contains("else if")) {
                     elseIfCount++;
                     numRegions++;
                 }
-
                 if (line.contains("while")) {
                     whileCount++;
                     numRegions++;
                 }
-
                 if (line.contains("do")) {
                     doWhileCount++;
                     numRegions++;
                 }
-
                 if (line.contains("for")) {
                     forCount++;
                     numRegions++;
                 }
-
                 if (line.contains("case")) {
                     caseCount++;
                     numRegions++;
                 }
-
                 if (line.contains("{")) {
                     curlyBracketCount++;
                 }
-
                 if (line.contains("(")) {
                     regularBracketCount++;
                 }
 
                 lineCount++;
-
-                comments = new ArrayList<>(Comparison.processComments(comments.toArray(new String[0])));
             }
+
+            return new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
+                    whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
         } catch (FileNotFoundException e) {
-            print(BRIGHT_RED + "File not found: " + e.getMessage()); // Catches errors
-        } catch (NumberFormatException e) {
-            print(BRIGHT_RED + "Error parsing year: " + e.getMessage());
+            print(BRIGHT_RED + "File not found: " + e.getMessage() + RESET);
+            return null;
         }
     }
 
@@ -136,79 +130,124 @@ public class Main {
         System.out.println(msg);
     }
 
-    public static void CSVMaker(String fileName, Comparison fileA, Comparison fileB, double finalPercent) {
-        try (FileWriter writer = new FileWriter(fileName)) {
-            writer.append("Metric,FileA,FileB,Deviation (%)\n");
-            writer.append("Line Count,").append(String.valueOf(fileA.getLineCount())).append(",")
-                    .append(String.valueOf(fileB.getLineCount())).append(",")
-                    .append(String.format("%.2f", fileA.getLineCountDiv())).append("\n");
-            writer.append("if Count,").append(String.valueOf(fileA.getIfCount())).append(",")
-                    .append(String.valueOf(fileB.getIfCount())).append(",")
-                    .append(String.format("%.2f", fileA.getIfCountDiv())).append("\n");
-            writer.append("Curly Bracket Count,").append(String.valueOf(fileA.getCurlyBracketCount())).append(",")
-                    .append(String.valueOf(fileB.getCurlyBracketCount())).append(",")
-                    .append(String.format("%.2f", fileA.getCurlyBracketCountDiv())).append("\n");
-            writer.append("Regular Bracket Count,").append(String.valueOf(fileA.getRegularBracketCount())).append(",")
-                    .append(String.valueOf(fileB.getRegularBracketCount())).append(",")
-                    .append(String.format("%.2f", fileA.getRegularBracketCountDiv())).append("\n");
-            writer.append("Cyclomatic Complexity,").append(String.valueOf(fileA.getNumRegions())).append(",")
-                    .append(String.valueOf(fileB.getNumRegions())).append(",")
-                    .append(String.format("%.2f", fileA.getNumRegionsDiv())).append("\n");
-            writer.append("Overall Similarity (%), , ,").append(String.format("%.2f", finalPercent)).append("\n");
+    public static void createFiles(String directoryName) {
+        processData(directoryShortCut + directoryName);
+        Comparison file1 = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
+                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
+        valueReset();
+    }
 
-            System.out.println("Results saved to " + fileName);
-        } catch (IOException e) {
-            System.out.println("Error writing to CSV file: " + e.getMessage());
+    public static int startMenu() {
+        print("Please select an option from one of the following:");
+        print("--------------------------------------------------");
+        print("[1]  |        Add a file for Comparison          |");
+        print("[2]  |           Compare two files               |");
+        print("[3]  |             Clear Outputs                 |");
+        print("[4]  |                 Quit                      |");
+
+        int input;
+
+        // Ensuring the inputted values are compatible with the code
+        while (true) {
+            try {
+                input = scanner.nextInt();
+                scanner.nextLine();
+                while (input < 1 || input > 4) {
+                    print("That's an invalid input! Please put an integer between 1 and 3");
+                    input = scanner.nextInt();
+                }
+                break;
+
+            } catch (InputMismatchException e) {
+                print("That's an invalid input! Please put an integer between 1 and 3");
+                scanner.nextLine();
+            }
         }
+        return (input);
     }
 
     public static void main(String[] args) {
-        processData(directoryShortCut + "SumOfMultiples1.java");
-        Comparison fileA = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileA));
-        print("-----------------------------------------------");
-        processData(directoryShortCut + "SumOfMultiples2.java");
-        Comparison fileB = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileB));
-        print("-----------------------------------------------");
-        processData(directoryShortCut + "SumOfMultiples3.java");
-        Comparison fileC = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileC));
-        print("-----------------------------------------------");
-        processData(directoryShortCut + "Spotit.java");
-        Comparison fileD = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileD));
-        print("-----------------------------------------------");
-        processData(directoryShortCut + "pspotit.java");
-        Comparison fileE = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileE));
-        print("-----------------------------------------------");
-        processData(directoryShortCut + "uspotit.java");
-        Comparison fileF = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileF));
-        print("-----------------------------------------------");
-        processData(directoryShortCut + "sspotit.java");
-        Comparison fileG = new Comparison(lineCount, ifCount, curlyBracketCount, regularBracketCount, forCount, caseCount,
-                whileCount, doWhileCount, elseIfCount, numRegions, new HashSet<>(comments));
-        valueReset();
-        print(String.valueOf(fileG));
+        Map<String, Comparison> files = new HashMap<>();
+        boolean skib = true;
 
-        double finalPercent = fileB.deviation(fileA);
+        print("Please input the type of files you wish to compare today! (ex. txt, java, py - it's case sensitive!");
+        extension = "." + scanner.nextLine();
+
+        print("Please enter the directory of the file in which you have added all the files you wish to compare: ");
+        directoryShortCut = scanner.nextLine() + "\\";
+
+        print("Please enter the name of the *txt* file you wish to output the results to:");
+        String outputFile = directoryShortCut + scanner.nextLine() + ".txt";
+        output.setFileName(outputFile);
+        print(outputFile);
+
+        while (skib) {
+            int input = startMenu();
+
+            switch (input) {
+                case 1:
+                    print("Enter the name you want to assign to this file:");
+                    String name = scanner.nextLine();
+                    print("Enter the actual name of the file (be EXACT- it's case sensitive :)):");
+                    String filePath = scanner.nextLine();
+
+                    Comparison comp = processData(directoryShortCut + filePath + extension);
+                    if (comp != null) {
+                        files.put(name.toLowerCase(), comp);
+                        print("File added successfully !");
+                    } else {
+                        print("Failed to process the file.");
+                    }
+                    break;
+
+                case 2:
+                    if (files.size() < 2) {
+                        print("Not enough files to compare. Add at least two files.");
+                        break;
+                    }
+
+                    print("Available files: " + files.keySet());
+                    print("Enter the name of the first file:");
+                    String file1 = scanner.nextLine().toLowerCase();
+                    print("Enter the name of the second file:");
+                    String file2 = scanner.nextLine().toLowerCase();
+
+                    if (files.containsKey(file1) && files.containsKey(file2)) {
+
+                        print("Please enter the confidence/threshold to determine cheating (50% - 70% recommended for larger files, " +
+                                "80% - 90% recommended for smaller files)");
+                        int guess = scanner.nextInt();
+                        double similarity = files.get(file1).deviation(files.get(file2), output, file1, file2);
+
+                        if (similarity >= guess) {
+                            output.logAndPrint(String.format("Based on the threshold, it's likely that the individuals cheated.%n"));
+                        }
+                        else {
+                            output.logAndPrint(String.format("Based on the threshold, it's unlikely that the individuals cheated.%n"));
+                        }
+
+                        output.writeToFile();
 
 
-        CSVMaker("comparison_results.csv", fileA, fileB, finalPercent);
+                    } else {
+                        print("One or both files not found.");
+                    }
+                    break;
 
+                case 3:
+                    output.clearLog();
+                    print("Output has been cleared!");
+
+                case 4:
+                    print("k.");
+                    skib = false;
+                    break;
+
+                default:
+                    print("Invalid choice. Please try again.");
+                    break;
+            }
+        }
     }
+
 }

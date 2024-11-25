@@ -1,0 +1,10 @@
+Files: a and b
+The weighted average deviation is: 0.68%
+Confidence score of cheating likelihood: 99.32%
+Based on the threshold, it's likely that the individuals cheated.
+
+Files: c and d
+The weighted average deviation is: 63.49%
+Confidence score of cheating likelihood: 36.51%
+Based on the threshold, it's unlikely that the individuals cheated.
+
